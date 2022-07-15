@@ -1,0 +1,12 @@
+/Users/ben/Desktop/Academic/Research/HCI/Laptop-TOIO/rust-osc/target/release/deps/cocoa-941b09373922c9eb.rmeta: /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/lib.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/appkit.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/base.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/foundation.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/quartzcore.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/macros.rs
+
+/Users/ben/Desktop/Academic/Research/HCI/Laptop-TOIO/rust-osc/target/release/deps/libcocoa-941b09373922c9eb.rlib: /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/lib.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/appkit.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/base.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/foundation.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/quartzcore.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/macros.rs
+
+/Users/ben/Desktop/Academic/Research/HCI/Laptop-TOIO/rust-osc/target/release/deps/cocoa-941b09373922c9eb.d: /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/lib.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/appkit.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/base.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/foundation.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/quartzcore.rs /Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/macros.rs
+
+/Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/lib.rs:
+/Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/appkit.rs:
+/Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/base.rs:
+/Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/foundation.rs:
+/Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/quartzcore.rs:
+/Users/ben/.cargo/registry/src/github.com-1ecc6299db9ec823/cocoa-0.24.0/src/macros.rs:

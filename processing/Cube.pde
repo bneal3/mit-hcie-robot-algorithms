@@ -1,9 +1,6 @@
 class Cube {
   int x;
   int y;
-  
-
-  
   int prex;
   int prey;
   float speedX;
@@ -11,12 +8,13 @@ class Cube {
   int lastTime = 0;
   //int oidx;
   //int oidy;
-  float targetx =-1;
-  float targety =-1;  
+  float targetx = -1;
+  float targety = -1;
   boolean isLost;
   boolean p_isLost;
   int id;
   int deg;
+  float targetAngle;
   long lastUpdate;
   int count=0;
   float ave_speedX;
@@ -25,6 +23,8 @@ class Cube {
   float pre_speedX[] = new float [aveFrameNum];
   float pre_speedY[] = new float [aveFrameNum];
 
+  boolean track;
+  boolean collisionDetection;
 
   Cube(int i, boolean lost) {
     id = i;
@@ -32,18 +32,21 @@ class Cube {
     p_isLost = lost;
 
     lastUpdate = System.currentTimeMillis();
-    
+
     for (int j = 0; j< aveFrameNum; j++) {
       pre_speedX[j] = 0;
       pre_speedY[j] = 0;
     }
+
+    track = false;
   }
+
   void resetCount() {
-    count =0;
+    count = 0;
   }
 
   boolean isAlive(long now) {
-    return(now < lastUpdate+200);
+    return(now < lastUpdate + 200);
   }
 
   int[] aimslow(float tx, float ty) {
@@ -84,9 +87,7 @@ class Cube {
     return res;
   }
 
-
-  //This function defines how the cubes aims at something
-  //the perceived behavior will strongly depend on this
+  // FUNCTION: This function defines how the cubes aims at something the perceived behavior will strongly depend on this
   int[] aim(float tx, float ty) {
     int left = 0;
     int right = 0;
@@ -111,10 +112,10 @@ class Cube {
       //face back
       float frac = -cos(diffAngle);
       if (diffAngle > 0) {
-        left  = -floor(100*frac);
-        right =  -100;
+        left = -floor(100*frac);
+        right = -100;
       } else {
-        left  =  -100;
+        left = -100;
         right = -floor(100*frac);
       }
     }
@@ -124,11 +125,12 @@ class Cube {
     res[1] = right;
     return res;
   }
+
   float distance(Cube o) {
     return distance(o.x, o.y);
   }
 
   float distance(float ox, float oy) {
-    return sqrt ( (x-ox)*(x-ox) + (y-oy)*(y-oy));
+    return sqrt((x - ox) * (x - ox) + (y - oy) * (y - oy));
   }
 }
