@@ -259,10 +259,6 @@ void probe() {
         // TODO: ---- Set target position to grid in front of where collision happen
         // TODO: ---- Save collision
         // TODO: --- Create new shape from collisions
-      } else {
-        cubes[iter].targetAngle = cubes[iter].deg;
-        cubes[iter].targetx = cubes[iter].x;
-        cubes[iter].targety = cubes[iter].y;
       }
     }
   } else {
