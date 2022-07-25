@@ -23,22 +23,34 @@ class Cube {
   float pre_speedX[] = new float [aveFrameNum];
   float pre_speedY[] = new float [aveFrameNum];
 
+  int direction;
   boolean track;
-  boolean collisionDetection;
+  boolean detect;
+  int detectionObjectId;
+  int detectionState;
+  int detectionObjectGridPosX;
+  int detectionObjectGridPosY;
+  int detectionObjectStartingGridPosX;
+  int detectionObjectStartingGridPosY;
 
   Cube(int i, boolean lost) {
     id = i;
-    isLost=lost;
+    isLost = lost;
     p_isLost = lost;
 
     lastUpdate = System.currentTimeMillis();
 
-    for (int j = 0; j< aveFrameNum; j++) {
+    for (int j = 0; j < aveFrameNum; j++) {
       pre_speedX[j] = 0;
       pre_speedY[j] = 0;
     }
 
     track = false;
+    detect = false;
+    detectionObjectId = -1;
+    detectionState = DetectionStates.get("None");
+    detectionObjectGridPosX = -1;
+    detectionObjectGridPosY = -1;
   }
 
   void resetCount() {
