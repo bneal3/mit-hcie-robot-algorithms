@@ -3,9 +3,9 @@ class Collision {
   int objectId;
   int x;
   int y;
-  int deg;
+  float deg;
 
-  Collision(int i, int oi, int xPos, int yPos, int degAng) {
+  Collision(int i, int oi, int xPos, int yPos, float degAng) {
     id = i;
     objectId = oi;
     x = xPos;

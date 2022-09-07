@@ -8,7 +8,7 @@ void oscEvent(OscMessage msg) {
     int posy = msg.get(3).intValue();
 
     int degrees = msg.get(4).intValue();
-    //println("Host "+ hostId +" id " + id+" "+posx +" " +posy +" "+degrees);
+    // println("Host "+ hostId +" id " + id+" "+posx +" " +posy +" "+degrees);
 
     id = cubesPerHost * hostId + id;
 
@@ -24,6 +24,8 @@ void oscEvent(OscMessage msg) {
 
       cubes[id].x = posx;
       cubes[id].y = posy;
+
+      cubes[id].preDeg = cubes[id].deg;
 
       cubes[id].deg = degrees;
 
@@ -128,7 +130,7 @@ void oscEvent(OscMessage msg) {
     //     cubes[id].targetx = targetPosition.getInt("x");
     //     cubes[id].targety = targetPosition.getInt("y");
     //     // FLOW: Set state to Backup
-    //     cubes[id].detectionState = DetectionStates.get("Backup");
+    //     cubes[id].detectionState = DetectStates.get("Backup");
     //   } else {
     //     objectId = cubes[id].detectionObjectId;
     //     for(int i = 0; i < objects.size(); i++) {

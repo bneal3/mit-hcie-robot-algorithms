@@ -101,14 +101,14 @@ void keyPressed() {
     println("Probing...");
     ArrayList<JSONObject> activeCubes = getActiveCubes(cubes);
     // FLOW: Send to start positions
-    for (int i = 0; i < activeCubes.size(); ++i) {
+    for (int i = 0; i < activeCubes.size(); i++) {
       int iter = activeCubes.get(i).getInt("id");
       int x = i * floor(grid.length / activeCubes.size());
-      JSONObject targetRealPosition = getRealPosition(x, 0);
-      float angleToRotate = getAngleToPosition(cubes[iter], targetRealPosition);
+      GridPosition targetGridPosition = grid[x][5];
+      float angleToRotate = getAngleToTargetPosition(cubes[iter], new Position(targetGridPosition.xCoordinate(targetGridPosition), targetGridPosition.yCoordinate(targetGridPosition)));
       cubes[iter].targetAngle = angleToRotate;
-      cubes[iter].targetx = targetRealPosition.getInt("x");
-      cubes[iter].targety = targetRealPosition.getInt("y");
+      cubes[iter].targetx = targetGridPosition.xCoordinate(targetGridPosition);
+      cubes[iter].targety = targetGridPosition.yCoordinate(targetGridPosition);
     }
     probe = true;
     break;

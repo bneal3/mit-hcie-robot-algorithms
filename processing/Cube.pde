@@ -1,37 +1,41 @@
 class Cube {
+  int count = 0;
+  // FLOW: Position Members
   int x;
   int y;
   int prex;
   int prey;
   float speedX;
   float speedY;
-  int lastTime = 0;
-  //int oidx;
-  //int oidy;
   float targetx = -1;
   float targety = -1;
+  // FLOW: Latency Members
   boolean isLost;
   boolean p_isLost;
-  int id;
-  int deg;
-  float targetAngle;
   long lastUpdate;
-  int count=0;
+  int lastTime = 0;
+  // FLOW: Angle Members
+  boolean isRotating;
+  int id;
+  float deg;
+  float preDeg;
+  float targetAngle;
+  // FLOW: Average Speed Members
+  int aveFrameNum = 10;
   float ave_speedX;
   float ave_speedY;
-  int aveFrameNum = 10;
-  float pre_speedX[] = new float [aveFrameNum];
-  float pre_speedY[] = new float [aveFrameNum];
+  float pre_speedX[] = new float[aveFrameNum];
+  float pre_speedY[] = new float[aveFrameNum];
 
-  int direction;
+  // FLOW: Probe Members
   boolean track;
+  int direction;
+  // FLOW: Detect Members
   boolean detect;
-  int detectionObjectId;
-  int detectionState;
-  int detectionObjectGridPosX;
-  int detectionObjectGridPosY;
-  int detectionObjectStartingGridPosX;
-  int detectionObjectStartingGridPosY;
+  int detectState;
+  int detectObjectId;
+  GridPosition detectObjectGridPosition;
+  GridPosition detectStartingGridPosition;
 
   Cube(int i, boolean lost) {
     id = i;
@@ -40,6 +44,8 @@ class Cube {
 
     lastUpdate = System.currentTimeMillis();
 
+    isRotating = false;
+
     for (int j = 0; j < aveFrameNum; j++) {
       pre_speedX[j] = 0;
       pre_speedY[j] = 0;
@@ -47,10 +53,9 @@ class Cube {
 
     track = false;
     detect = false;
-    detectionObjectId = -1;
-    detectionState = DetectionStates.get("None");
-    detectionObjectGridPosX = -1;
-    detectionObjectGridPosY = -1;
+    detectState = DetectStates.get("None");
+    detectObjectId = -1;
+    detectObjectGridPosition = new GridPosition(-1, -1);
   }
 
   void resetCount() {
