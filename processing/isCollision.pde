@@ -1,10 +1,10 @@
-int time = millis();
+int collisionTime = millis();
 
 void isCollision(int iter, GridPosition gridPosition) {
   // FLOW: Start timer
-  if(!timer) {
-    startTimer();
-  } else if(millis() - time >= COLLISION_TIMER_LIMIT) {
+  if(!collisionTimer) {
+    startCollisionTimer();
+  } else if(millis() - collisionTime >= COLLISION_TIMER_LIMIT) {
     int objIter = -1;
     int collisions = 0;
     int objectId = objects.size();
@@ -31,55 +31,8 @@ void isCollision(int iter, GridPosition gridPosition) {
       objects.add(obj);
       // FLOW: Set starting grid position
       cubes[iter].detectStartingGridPosition = gridPosition;
-      // FLOW: Run probe target position calculation code here
-      // FLOW: Move toio is opposite direction (1 CUBE_LENGTHS)
-      // FLOW: Find which way target grid is positioned (save this from target pos calculation)
-      GridPosition targetGridPositionFromState = new GridPosition(-1, -1);
-      switch(cubes[iter].direction) {
-        case 3:
-          if(gridPosition.x < grid.length) {
-            cubes[iter].detectObjectGridPosition.x = gridPosition.x + 1;
-          } else {
-            cubes[iter].detectObjectGridPosition.x = gridPosition.x;
-          }
-          cubes[iter].detectObjectGridPosition.y = gridPosition.y;
-          targetGridPositionFromState = new GridPosition(gridPosition.x - 1, gridPosition.y);
-          break;
-        case 2:
-          if(gridPosition.x > 0) {
-            cubes[iter].detectObjectGridPosition.x = gridPosition.x - 1;
-          } else {
-            cubes[iter].detectObjectGridPosition.x = gridPosition.x;
-          }
-          cubes[iter].detectObjectGridPosition.y = gridPosition.y;
-          targetGridPositionFromState = new GridPosition(gridPosition.x + 1, gridPosition.y);
-          break;
-        case 0:
-          if(gridPosition.y > 0) {
-            cubes[iter].detectObjectGridPosition.y = gridPosition.y - 1;
-          } else {
-            cubes[iter].detectObjectGridPosition.y = gridPosition.y;
-          }
-          cubes[iter].detectObjectGridPosition.x = gridPosition.x;
-          targetGridPositionFromState = new GridPosition(gridPosition.x, gridPosition.y + 1);
-          break;
-        case 1:
-          if(gridPosition.y < grid[0].length) {
-            cubes[iter].detectObjectGridPosition.y = gridPosition.y + 1;
-          } else {
-            cubes[iter].detectObjectGridPosition.y = gridPosition.y;
-          }
-          cubes[iter].detectObjectGridPosition.x = gridPosition.x;
-          targetGridPositionFromState = new GridPosition(gridPosition.x, gridPosition.y - 1);
-          break;
-        default:
-          cubes[iter].detectObjectGridPosition = gridPosition;
-          targetGridPositionFromState = gridPosition;
-          break;
-      }
-      cubes[iter].targetx = targetGridPositionFromState.xCoordinate(targetGridPositionFromState);
-      cubes[iter].targety = targetGridPositionFromState.yCoordinate(targetGridPositionFromState);
       // FLOW: Set state to Backup
+      backup(iter);
       cubes[iter].detectState = DetectStates.get("Backup");
     } else {
       // FLOW: If already detecting, push to collisions if not already there
@@ -92,15 +45,15 @@ void isCollision(int iter, GridPosition gridPosition) {
       }
       if(!contains) { objects.get(objIter).collisions.add(collision); }
     }
-    stopTimer();
+    stopCollisionTimer();
   }
 }
 
-void startTimer() {
-  time = millis();
-  timer = true;
+void startCollisionTimer() {
+  collisionTime = millis();
+  collisionTimer = true;
 }
 
-void stopTimer() {
-  timer = false;
+void stopCollisionTimer() {
+  collisionTimer = false;
 }

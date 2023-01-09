@@ -5,3 +5,4 @@ int maxMotorSpeed = 115;
 int appFrameRate = 50;
 HashMap<String, Integer> Directions = new HashMap<String, Integer>();
 HashMap<String, Integer> DetectStates = new HashMap<String, Integer>();
+HashMap<String, Integer> TransportStates = new HashMap<String, Integer>();

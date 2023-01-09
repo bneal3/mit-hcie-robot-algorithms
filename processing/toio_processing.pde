@@ -12,7 +12,14 @@ int GRID_WIDTH = floor((MAT_SIZE - CUBE_SIZE) / CUBE_SIZE);
 int GRID_HEIGHT = floor((MAT_SIZE - CUBE_SIZE) / CUBE_SIZE);
 int SQUARE_WIDTH = (MAT_SIZE - CUBE_SIZE) / GRID_WIDTH;
 int SQUARE_HEIGHT = (MAT_SIZE - CUBE_SIZE) / GRID_HEIGHT;
+int POSITION_TIMER_LIMIT = 1500;
+int DEGREE_TIMER_LIMIT = 250;
 int COLLISION_TIMER_LIMIT = 500;
+int BACKUP_TIMER_LIMIT = 300;
+int SHIFT_TIMER_LIMIT = 200;
+int ATTACK_TIMER_LIMIT = 1000;
+int LOST_TIMER_LIMIT = 2000;
+int TRANSPORT_STARTING_OFFSET = 25;
 
 // VARIABLE: OSC object
 OscP5 oscP5;
@@ -27,9 +34,18 @@ boolean mouseDrive = false;
 boolean chase = false;
 boolean spin = false;
 boolean probe = false;
-boolean timer = false;
+boolean transport = false;
 
-boolean test = true;
+// VARIABLE: Timers
+boolean positionTimer = false;
+boolean degreeTimer = false;
+boolean collisionTimer = false;
+boolean backupTimer = false;
+boolean shiftTimer = false;
+boolean attackTimer = false;
+boolean lostTimer = false;
+
+boolean test = false;
 
 // VARIABLE: Grid board
 GridPosition[][] grid;
@@ -53,6 +69,9 @@ ArrayList<JSONObject> getActiveCubes(Cube cubes[]) {
   return activeCubes;
 }
 
+// TODO: Videos: (Sweeping, Object Detection/Moving)
+// TODO: Pictures: (Sweeping w/ 1, Sweeping w/ 2, Object Detection Mid-Detect, Object Detection Full-Detect, Object Moving Setup, Object Moving Positioning, Object Moving Contact, Object Moving Movement)
+
 void setup() {
   // Constant Instantiation
   // Directions
@@ -65,6 +84,12 @@ void setup() {
   DetectStates.put("Backup", 0);
   DetectStates.put("Shift", 1);
   DetectStates.put("Attack", 2);
+  DetectStates.put("Lost", 3);
+  // TransportStates
+  TransportStates.put("None", -1);
+  TransportStates.put("Position", 0);
+  TransportStates.put("Rotate", 1);
+  TransportStates.put("Idle", 2);
 
   // FLOW: OSC Setup
   // FLOW: Receive messages on port 3333
@@ -90,6 +115,9 @@ void setup() {
     for (int j = 0; j < GRID_HEIGHT; j++) {
       GridPosition position = new GridPosition(i, j); // new GridPosition(MAT_STARTING_POS + (i * SQUARE_WIDTH), MAT_STARTING_POS + (j * SQUARE_HEIGHT));
       grid[i][j] = position;
+      // if(j < GRID_HEIGHT / 2) {
+      //   grid[i][j].traveled = true;
+      // }
     }
   }
 
@@ -115,9 +143,9 @@ void draw() {
     for (int i = 0; i < grid.length; i++) {
       for (int j = 0; j < grid.length; j++) {
         if(!grid[i][j].traveled) {
-          fill(0, 255, 0);
+          fill(255, 255, 255);
         } else {
-          fill(255, 0, 0);
+          fill(173, 216, 230);
         }
         rect(grid[i][j].xCoordinate(grid[i][j]) - (CUBE_SIZE / 2), grid[i][j].yCoordinate(grid[i][j]) - (CUBE_SIZE / 2), SQUARE_WIDTH, SQUARE_HEIGHT);
       }
@@ -141,11 +169,22 @@ void draw() {
     for (int j = 0; j < objects.get(i).collisions.size(); j++) {
       // FLOW: Draw collision points from object collisions
       pushMatrix();
+      stroke(255, 127, 0);
+      fill(255, 127, 0);
       translate(objects.get(i).collisions.get(j).x, objects.get(i).collisions.get(j).y);
       rotate(objects.get(i).collisions.get(j).deg * (PI / 180));
       rect(-5, -5, 10, 10);
       popMatrix();
-      // TODO: Create new shape from collisions by finding collision closest in proximity and drawing line, if line drawn, then go to next closest (only 2 though)
+      // FLOW: Create new shape from collisions by finding collision closest in proximity and drawing line, if line drawn, then go to next closest (only 2 though)
+      if(j > 0) {
+        pushMatrix();
+        stroke(255, 127, 0);
+        line(objects.get(i).collisions.get(j).x, objects.get(i).collisions.get(j).y, objects.get(i).collisions.get(j - 1).x, objects.get(i).collisions.get(j - 1).y);
+        if(j == objects.get(i).collisions.size() - 1) {
+          line(objects.get(i).collisions.get(j).x, objects.get(i).collisions.get(j).y, objects.get(i).collisions.get(0).x, objects.get(i).collisions.get(0).y);
+        }
+        popMatrix();
+      }
     }
   }
 
@@ -171,7 +210,7 @@ void draw() {
     r = min(mulr, r);
     for (int i = 0; i < nCubes; ++i) {
       if (cubes[i].isLost == false) {
-        float angle = (TWO_PI * i) / nCubes;
+        float angle = (TWO_PI * 0) / nCubes;
         float na = aMouse + angle;
         float tax = cx + r*cos(na);
         float tay = cy + r*sin(na);
@@ -202,21 +241,82 @@ void draw() {
     probe();
     for(int i = 0; i < nCubes; i++) {
       if(!cubes[i].isLost) {
-        fill(0, 255, 0);
+        fill(255, 127, i * 50);
         ellipse(cubes[i].targetx, cubes[i].targety, 10, 10);
         // FLOW: Get target angle difference
         float da = abs(cubes[i].deg - cubes[i].targetAngle);
         float daOverflow = abs(cubes[i].deg - (cubes[i].targetAngle + 360));
+        // FLOW: Move toio if difference in angle is less than 7, rotate it if not
+        // println("detectState: " + cubes[i].detectState);
         if(da <= 7 || daOverflow <= 7) {
           if(cubes[i].isRotating) { cubes[i].isRotating = false; }
-          // println("isRotating from update: " + cubes[i].isRotating);
-          moveCube(i, cubes[i].targetx, cubes[i].targety);
+          if(cubes[i].detectState == DetectStates.get("None")) { // FLOW: If in probe use moveCube
+            // FLOW: Recompute target angle
+            float angleToRotate = getAngleToTargetPosition(cubes[i], new Position((int)(cubes[i].targetx), (int)(cubes[i].targety)));
+            float datr = abs(angleToRotate - cubes[i].targetAngle);
+            float datrOverflow = abs(angleToRotate - (cubes[i].targetAngle + 360));
+            if(datr > 7 || datrOverflow > 7) { cubes[i].targetAngle = angleToRotate; }
+            moveCube(i, cubes[i].targetx, cubes[i].targety);
+          } else { // FLOW: If in detect mode, use motorControl
+            // println("targetAngle: " + cubes[i].targetAngle);
+            // println("targetAngle: " + cubes[i].deg);
+            cubes[i].targetAngle = -1;
+            motorControl(i, cubes[i].detectMotorControl[0], cubes[i].detectMotorControl[1], (0));
+          }
           if(cubes[i].track) { setGridTraveled(cubes[i].x, cubes[i].y); }
-        } else {
-          // println("da " + da);
-          // println("daOverflow " + daOverflow);
+        } else if(cubes[i].targetAngle > -1) {
           if(!cubes[i].isRotating) { cubes[i].isRotating = true; }
+          // println("da: " + da);
+          // println("daOverflow: " + daOverflow);
+          // println("degree: " + cubes[i].deg);
+          // println("targetAngle: " + cubes[i].targetAngle);
           rotateCube(i, cubes[i].targetAngle);
+        }
+      }
+    }
+  }
+
+  if(transport) {
+    if(objects.size() > 0) {
+      transport(Directions.get("Right"));
+      // FLOW: Check if all cubes are in position
+      boolean areCubesInPosition = true;
+      for(int i = 0; i < nCubes; i++) {
+        if(!cubes[i].isLost) {
+          if(cubes[i].transportState != TransportStates.get("Idle")) {
+            areCubesInPosition = false;
+          }
+        }
+      }
+      for(int i = 0; i < nCubes; i++) {
+        if(!cubes[i].isLost) {
+          // FLOW: Fill target position for cube
+          fill(255, 127, i * 50);
+          // ellipse(cubes[i].targetx, cubes[i].targety, 10, 10);
+          // FLOW: Get target angle difference
+          float da = abs(cubes[i].deg - cubes[i].targetAngle);
+          float daOverflow = abs(cubes[i].deg - (cubes[i].targetAngle + 360));
+          // FLOW: Move toio if difference in angle is less than 7, rotate it if not
+          // println("transportState: " + cubes[i].transportState);
+          if(da <= 7 || daOverflow <= 7) {
+            if(cubes[i].isRotating) { cubes[i].isRotating = false; }
+            if(cubes[i].transportState == TransportStates.get("Position")) { // FLOW: If in position use moveCube
+              // FLOW: Recompute target angle
+              float angleToRotate = getAngleToTargetPosition(cubes[i], new Position((int)(cubes[i].targetx), (int)(cubes[i].targety)));
+              float datr = abs(angleToRotate - cubes[i].targetAngle);
+              float datrOverflow = abs(angleToRotate - (cubes[i].targetAngle + 360));
+              if(datr > 7 || datrOverflow > 7) { cubes[i].targetAngle = angleToRotate; }
+              moveCube(i, cubes[i].targetx, cubes[i].targety);
+            } else if(cubes[i].transportState == TransportStates.get("Idle")) {
+              cubes[i].targetAngle = -1;
+              if(areCubesInPosition) {
+                motorControl(i, cubes[i].transportMotorControl[0], cubes[i].transportMotorControl[1], (0));
+              }
+            }
+          } else if(cubes[i].targetAngle > -1) {
+            if(!cubes[i].isRotating) { cubes[i].isRotating = true; }
+            rotateCube(i, cubes[i].targetAngle);
+          }
         }
       }
     }
@@ -228,6 +328,33 @@ void draw() {
     cubes[i].p_isLost = cubes[i].isLost;
     if(cubes[i].lastUpdate < now - 1500 && cubes[i].isLost == false) {
       cubes[i].isLost = true;
+    }
+  }
+}
+
+void transport(int direction) {
+  ArrayList<JSONObject> activeCubes = getActiveCubes(cubes);
+  for (int i = 0; i < activeCubes.size(); i++) {
+    // FLOW: Necessary variables for calculations
+    int iter = activeCubes.get(i).getInt("id");
+    if(cubes[iter].transportState == TransportStates.get("Position")) {
+      float distanceFromTarget = cubes[iter].distance(cubes[iter].targetx, cubes[iter].targety);
+      if(distanceFromTarget < 14) {
+        float angleToRotate = -1;
+        if(direction == Directions.get("Right")) {
+          angleToRotate = getAngleToTargetPosition(cubes[iter], new Position((int)(cubes[iter].targetx + TRANSPORT_STARTING_OFFSET), (int)(cubes[iter].targety)));
+        }
+        cubes[iter].targetAngle = angleToRotate;
+        cubes[iter].transportState = TransportStates.get("Rotate");
+      }
+    } else if(cubes[iter].transportState == TransportStates.get("Rotate")) {
+      float da = abs(cubes[i].deg - cubes[i].targetAngle);
+      float daOverflow = abs(cubes[i].deg - (cubes[i].targetAngle + 360));
+      if(da <= 7 || daOverflow <= 7) {
+        cubes[iter].transportMotorControl[0] = 75;
+        cubes[iter].transportMotorControl[1] = 75;
+        cubes[iter].transportState = TransportStates.get("Idle");
+      }
     }
   }
 }

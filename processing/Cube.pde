@@ -5,6 +5,8 @@ class Cube {
   int y;
   int prex;
   int prey;
+  int timeoutx;
+  int timeouty;
   float speedX;
   float speedY;
   float targetx = -1;
@@ -34,8 +36,12 @@ class Cube {
   boolean detect;
   int detectState;
   int detectObjectId;
-  GridPosition detectObjectGridPosition;
   GridPosition detectStartingGridPosition;
+  int detectMotorControl[] = new int[2];
+  // FLOW: Transport Members
+  int transportState;
+  Position transportPosition;
+  int transportMotorControl[] = new int[2];
 
   Cube(int i, boolean lost) {
     id = i;
@@ -55,7 +61,14 @@ class Cube {
     detect = false;
     detectState = DetectStates.get("None");
     detectObjectId = -1;
-    detectObjectGridPosition = new GridPosition(-1, -1);
+    detectStartingGridPosition = new GridPosition(-1, -1);
+    detectMotorControl[0] = 0;
+    detectMotorControl[1] = 0;
+
+    transportState = TransportStates.get("None");
+    transportPosition = new Position(-1, -1);
+    transportMotorControl[0] = 0;
+    transportMotorControl[1] = 0;
   }
 
   void resetCount() {

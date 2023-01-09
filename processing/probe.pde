@@ -13,25 +13,27 @@ void probe() {
   if(!boardProbed) {
     ArrayList<JSONObject> activeCubes = getActiveCubes(cubes);
     for (int i = 0; i < activeCubes.size(); i++) {
-      // FLOW: Necessary Variables for calculations
+      // FLOW: Necessary variables for calculations
       int iter = activeCubes.get(i).getInt("id");
       GridPosition gridPosition = getGridPosition(cubes[iter].x, cubes[iter].y);
       float distanceFromTarget = cubes[iter].distance(cubes[iter].targetx, cubes[iter].targety);
-      println("Deg difference: " + floor(abs(cubes[i].deg - cubes[i].preDeg)));
-      // FLOW: Collision detected
-      if(distanceFromTarget > 14 && abs(cubes[i].x - cubes[i].prex) <= 1 && abs(cubes[i].y - cubes[i].prey) <= 1 && floor(abs(cubes[i].deg - cubes[i].preDeg)) < 1) {
+      int degDifference = floor(abs(cubes[iter].deg - cubes[iter].preDeg));
+      // FLOW: Collision detected IF (toio is greater than a certain distance from target, has not moved its current position and has not changed its position a certain degrees)
+      if(distanceFromTarget >= 14
+        && abs(cubes[iter].x - cubes[iter].prex) <= 1
+        && abs(cubes[iter].y - cubes[iter].prey) <= 1
+        && ((degDifference <= 2 || degDifference >= 356)
+        || (abs(cubes[iter].y - cubes[iter].timeoutx) <= 1 && abs(cubes[iter].y - cubes[iter].timeouty) <= 1))) {
         isCollision(iter, gridPosition);
       } else {
-        stopTimer();
+        stopCollisionTimer();
       }
       // FLOW: Run detection algorithm
       if(cubes[iter].detect) {
-        detect(iter, gridPosition, distanceFromTarget);
-      } else {
-        // FLOW: Run probe algorithm
-        if(distanceFromTarget < 14) { // FLOW: if (destination reached)
-          setTargetPositionFromPath(iter, gridPosition, i, activeCubes.size());
-        }
+        detect(iter, gridPosition, i, activeCubes.size());
+      } else { // FLOW: Run probe algorithm
+        // FLOW: if (destination reached)
+        if(distanceFromTarget < 14) { setTargetPositionFromPath(iter, gridPosition, i, activeCubes.size()); }
       }
     }
   } else {

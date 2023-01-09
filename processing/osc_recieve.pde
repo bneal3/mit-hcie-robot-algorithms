@@ -1,3 +1,5 @@
+int degreeTime = millis();
+int positionTime = millis();
 
 void oscEvent(OscMessage msg) {
   if (msg.checkAddrPattern("/position") == true) {
@@ -25,7 +27,20 @@ void oscEvent(OscMessage msg) {
       cubes[id].x = posx;
       cubes[id].y = posy;
 
-      cubes[id].preDeg = cubes[id].deg;
+      if(!positionTimer) {
+        startPositionTimer();
+      } else if(millis() - positionTime >= POSITION_TIMER_LIMIT) {
+        cubes[id].timeoutx = cubes[id].x;
+        cubes[id].timeouty = cubes[id].y;
+        stopPositionTimer();
+      }
+
+      if(!degreeTimer) {
+        startDegreeTimer();
+      } else if(millis() - degreeTime >= DEGREE_TIMER_LIMIT) {
+        cubes[id].preDeg = cubes[id].deg;
+        stopDegreeTimer();
+      }
 
       cubes[id].deg = degrees;
 
@@ -150,4 +165,22 @@ void oscEvent(OscMessage msg) {
     int shake_level = msg.get(6).intValue();
     println("motion for id " + id + ": " + flatness + ", " + hit + ", " + double_tap + ", " + face_up + ", " + shake_level);
   }
+}
+
+void startPositionTimer() {
+  positionTime = millis();
+  positionTimer = true;
+}
+
+void stopPositionTimer() {
+  positionTimer = false;
+}
+
+void startDegreeTimer() {
+  degreeTime = millis();
+  degreeTimer = true;
+}
+
+void stopDegreeTimer() {
+  degreeTimer = false;
 }
